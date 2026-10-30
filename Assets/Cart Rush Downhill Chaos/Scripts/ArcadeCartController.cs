@@ -4,23 +4,23 @@ using UnityEngine.InputSystem;
 public class ArcadeCartController : MonoBehaviour
 {
     [Header("Referencias")]
-    public Transform modeloVisual;     // Asigna aquí el hijo 'Cube' o carrocería
+    public Transform modeloVisual;     // Asigna aquï¿½ el hijo 'Cube' o carrocerï¿½a
     public LayerMask capaSuelo;        // Selecciona la capa 'Suelo'
 
-    [Header("Velocidad y Aceleración")]
+    [Header("Velocidad y Aceleraciï¿½n")]
     public float aceleracion = 120f;
     public float velocidadMaxima = 40f;
     public float reversa = 20f;
     public float fuerzaFreno = 5f;
     public float fuerzaGravedadExtra = 40f; // Mantiene el carrito pegado al suelo en rampas
 
-    [Header("Dirección y Derrape")]
+    [Header("Direcciï¿½n y Derrape")]
     public float fuerzaGiro = 90f;
     public float inclinacionCarroceri = 15f;
     [Range(0f, 1f)]
     public float derrapeFriccion = 0.90f;
 
-    [Header("Alineación con Rampas")]
+    [Header("Alineaciï¿½n con Rampas")]
     public float distanciaRayoSuelo = 2.5f;
     public float velocidadAlineacion = 10f;
 
@@ -35,7 +35,7 @@ public class ArcadeCartController : MonoBehaviour
 
         if (rb != null)
         {
-            // Bloqueamos inclinaciones físicas impredecibles para evitar que vuele o se ponga inestable
+            // Bloqueamos inclinaciones fï¿½sicas impredecibles para evitar que vuele o se ponga inestable
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         }
 
@@ -91,7 +91,7 @@ public class ArcadeCartController : MonoBehaviour
 
     void AplicarMovimiento()
     {
-        float velAdelante = Vector3.Dot(rb.velocity, transform.forward);
+        float velAdelante = Vector3.Dot(rb.linearVelocity, transform.forward);
 
         if (moveInput.y > 0)
         {
@@ -109,18 +109,18 @@ public class ArcadeCartController : MonoBehaviour
         }
         else
         {
-            Vector3 velHorizontal = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+            Vector3 velHorizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             rb.AddForce(-velHorizontal * fuerzaFreno, ForceMode.Acceleration);
         }
     }
 
     void AplicarGiro()
     {
-        float velocidadActual = new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude;
+        float velocidadActual = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude;
 
         if (velocidadActual > 0.2f && moveInput.x != 0)
         {
-            float sentidoGiro = Vector3.Dot(rb.velocity, transform.forward) >= -0.1f ? 1f : -1f;
+            float sentidoGiro = Vector3.Dot(rb.linearVelocity, transform.forward) >= -0.1f ? 1f : -1f;
             float rotacionY = moveInput.x * fuerzaGiro * sentidoGiro * Time.fixedDeltaTime;
 
             transform.Rotate(0f, rotacionY, 0f, Space.World);
@@ -129,20 +129,20 @@ public class ArcadeCartController : MonoBehaviour
 
     void SimularDerrapeArcade()
     {
-        Vector3 velForward = transform.forward * Vector3.Dot(rb.velocity, transform.forward);
-        Vector3 velRight = transform.right * Vector3.Dot(rb.velocity, transform.right);
+        Vector3 velForward = transform.forward * Vector3.Dot(rb.linearVelocity, transform.forward);
+        Vector3 velRight = transform.right * Vector3.Dot(rb.linearVelocity, transform.right);
 
-        rb.velocity = velForward + (velRight * derrapeFriccion) + new Vector3(0, rb.velocity.y, 0);
+        rb.linearVelocity = velForward + (velRight * derrapeFriccion) + new Vector3(0, rb.linearVelocity.y, 0);
     }
 
     void InclinacionVisual()
     {
         if (modeloVisual == null) return;
 
-        // Inclinación de rampa adaptada a la normal del suelo en el modelo estético
+        // Inclinaciï¿½n de rampa adaptada a la normal del suelo en el modelo estï¿½tico
         Quaternion rotacionRampa = Quaternion.FromToRotation(Vector3.up, normalSuelo);
 
-        // Inclinación estética lateral en giros
+        // Inclinaciï¿½n estï¿½tica lateral en giros
         float anguloZ = -moveInput.x * inclinacionCarroceri;
         Quaternion rotacionGiro = Quaternion.Euler(0, 0, anguloZ);
 
