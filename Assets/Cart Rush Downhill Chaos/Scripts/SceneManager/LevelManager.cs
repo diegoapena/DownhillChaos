@@ -12,12 +12,36 @@ public class LevelManager : MonoBehaviour
 
     private void Awake()
     {
-        // Se asegura de activar la imagen en runtime y mantenerla transparente al inicio
+        // Forzar alpha en 1 al inicio para tapar la pantalla antes del primer frame
         if (fadeCanvasGroup != null)
         {
             fadeCanvasGroup.gameObject.SetActive(true);
-            fadeCanvasGroup.alpha = 0f;
+            fadeCanvasGroup.alpha = 1f;
         }
+    }
+
+    private void Start()
+    {
+        // Iniciar el fade in (de 1 a 0) al cargar la escena
+        if (fadeCanvasGroup != null)
+        {
+            StartCoroutine(FadeInInitial());
+        }
+    }
+
+    private IEnumerator FadeInInitial()
+    {
+        float timer = 0f;
+
+        // Transición de alpha 1 a 0
+        while (timer < fadeDuration)
+        {
+            timer += Time.deltaTime;
+            fadeCanvasGroup.alpha = Mathf.Clamp01(1f - (timer / fadeDuration));
+            yield return null;
+        }
+
+        fadeCanvasGroup.alpha = 0f;
     }
 
     public void TriggerRestart()
