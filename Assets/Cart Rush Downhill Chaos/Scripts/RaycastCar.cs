@@ -4,7 +4,7 @@ using UnityEngine;
 public class RaycastCar : MonoBehaviour
 {
     [Header("Transformaciones de las Ruedas")]
-    [SerializeField] private Transform[] wheelTransforms; // Dagiti 4 a point vacíos (Point_Rueda_...)
+    [SerializeField] private Transform[] wheelTransforms; // Los 4 puntos vacíos (Point_Rueda_...)
 
     [Header("Suspensión (Calibrada)")]
     [SerializeField] private float restDistance = 0.5f;
@@ -21,11 +21,10 @@ public class RaycastCar : MonoBehaviour
     [SerializeField][Range(0f, 1f)] private float tireGripFactor = 0.95f;
     [SerializeField] private float maxSteerAngle = 30f;
 
-    [Header("Motor y Frenos")]
+    [Header("Motor (Aceleración Automática)")]
     [SerializeField] private float accelPower = 15000f;
     [SerializeField] private float maxSpeed = 20f;
     [SerializeField] private AnimationCurve powerCurve = AnimationCurve.Linear(0, 1, 1, 0.1f);
-    [SerializeField] private float brakePower = 20000f;
 
     [Header("Control en el Aire")]
     [Tooltip("Fuerza de giro cuando el carro está saltando o fuera del suelo")]
@@ -37,7 +36,7 @@ public class RaycastCar : MonoBehaviour
     [SerializeField] private float timeToTriggerFlip = 2.0f;
 
     [Header("Elementos de UI (Opcional)")]
-    [SerializeField] private GameObject miObjetoUI; // Elemento ti UI a mabalin a madestroy
+    [SerializeField] private GameObject miObjetoUI;
 
     private float flippedTimer = 0f;
     private Rigidbody rb;
@@ -54,9 +53,8 @@ public class RaycastCar : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float accelInput = Input.GetAxis("Vertical");
+        // Solo leemos el control horizontal (Izquierda / Derecha)
         float steerInput = Input.GetAxis("Horizontal");
-        bool isBraking = Input.GetKey(KeyCode.Space);
 
         bool isGrounded = false;
 
@@ -64,7 +62,7 @@ public class RaycastCar : MonoBehaviour
         {
             Transform wheel = wheelTransforms[i];
 
-            // Ángulo de dirección para ruedas delanteras (0 ken 1)
+            // Ángulo de dirección para ruedas delanteras (0 y 1)
             float currentSteerAngle = (i == 0 || i == 1) ? steerInput * maxSteerAngle : 0f;
             Quaternion steerRotation = Quaternion.AngleAxis(currentSteerAngle, wheel.up);
 
@@ -82,7 +80,7 @@ public class RaycastCar : MonoBehaviour
             // Raycast hacia abajo local de la rueda
             if (Physics.Raycast(wheel.position, -wheel.up, out RaycastHit hit, restDistance, groundLayer))
             {
-                isGrounded = true; // Agsagsagid ti lugan iti daga
+                isGrounded = true;
                 Vector3 wheelWorldVel = rb.GetPointVelocity(wheel.position);
 
                 // 1. POSICIÓN VISUAL BLINDADA
@@ -107,30 +105,15 @@ public class RaycastCar : MonoBehaviour
 
                 rb.AddForceAtPosition(steeringDir * (desiredAccel * (rb.mass / 4f)), wheel.position);
 
-                // 4. ACELERACIÓN / FRENO
-                if (isBraking)
-                {
-                    float forwardVel = Vector3.Dot(accelDir, wheelWorldVel);
-                    float brakeAccel = -forwardVel * brakePower;
-                    rb.AddForceAtPosition(accelDir * brakeAccel, wheel.position);
-                }
-                else if (accelInput != 0)
-                {
-                    float currentSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
-                    float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
+                // 4. ACELERACIÓN AUTOMÁTICA CONSTANTE (Siempre avanza)
+                float currentSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
+                float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
 
-                    // Impulso extra tapno saan a mabawasan ti spid ti lugan no agkurba
-                    float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.25f : 1.0f;
-                    float availableTorque = powerCurve.Evaluate(normalizedSpeed) * accelInput * turnBoost;
+                // Mantiene el impulso en curvas
+                float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.25f : 1.0f;
+                float availableTorque = powerCurve.Evaluate(normalizedSpeed) * turnBoost;
 
-                    rb.AddForceAtPosition(accelDir * (availableTorque * accelPower), wheel.position);
-                }
-                else
-                {
-                    float forwardVel = Vector3.Dot(accelDir, wheelWorldVel);
-                    float passiveBrake = -forwardVel * 1000f;
-                    rb.AddForceAtPosition(accelDir * passiveBrake, wheel.position);
-                }
+                rb.AddForceAtPosition(accelDir * (availableTorque * accelPower), wheel.position);
             }
             else
             {
@@ -142,7 +125,7 @@ public class RaycastCar : MonoBehaviour
             }
         }
 
-        // CONTROL AÉREO: No awan saggid dagiti rueda iti daga, mangyaplay ti torque tapno makagiro iti nga-as
+        // CONTROL AÉREO: Girar en el aire con A/D o Flechas
         if (!isGrounded && steerInput != 0)
         {
             rb.AddTorque(transform.up * (steerInput * airControlPower));
@@ -159,7 +142,6 @@ public class RaycastCar : MonoBehaviour
 
             if (flippedTimer >= timeToTriggerFlip)
             {
-                // LImpiaron ti UI sakbay ti panag-restart tapno awan ti null reference error
                 SafeDestroyUI();
 
                 if (levelManager != null)
@@ -174,7 +156,6 @@ public class RaycastCar : MonoBehaviour
         }
     }
 
-    // Método a natalged a mang-destroy ti objeto a UI tapno maliklikan ti SerializedObjectNotCreatableException
     public void SafeDestroyUI()
     {
         if (miObjetoUI != null)
