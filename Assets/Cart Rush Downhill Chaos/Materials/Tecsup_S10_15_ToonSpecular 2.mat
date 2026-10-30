@@ -25,9 +25,9 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _Bands: 3.62
-    - _Shininess: 70.6
-    - _SpecCutoff: 0.01
+    - _Bands: 10
+    - _Shininess: 1
+    - _SpecCutoff: 0.197
     m_Colors:
     - _BaseColor: {r: 0.90943396, g: 0.90943396, b: 0.90943396, a: 1}
     - _Color: {r: 0.19433957, g: 0.59716976, b: 1, a: 1}
