@@ -829,7 +829,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   tireGripFactor: 1
-  maxSteerAngle: 60
+  maxSteerAngle: 10
   accelPower: 15000
   maxSpeed: 10
   powerCurve:
@@ -870,7 +870,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 1200
   m_LinearDamping: 0
-  m_AngularDamping: 15
+  m_AngularDamping: 10
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
