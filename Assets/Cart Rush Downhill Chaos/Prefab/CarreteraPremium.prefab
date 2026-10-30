@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2839737345545628145}
   - component: {fileID: 3973103113127956672}
   - component: {fileID: 4666998741790133416}
-  - component: {fileID: 6266553771485148410}
   m_Layer: 0
   m_Name: CarreteraPremium
   m_TagString: Untagged
@@ -35614,26 +35613,4 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7045090858799598670}
-  m_Mesh: {fileID: 0}
---- !u!64 &6266553771485148410
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7045090858799598670}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 0}

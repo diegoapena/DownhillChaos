@@ -4,7 +4,7 @@ using UnityEngine;
 public class RaycastCar : MonoBehaviour
 {
     [Header("Transformaciones de las Ruedas")]
-    [SerializeField] private Transform[] wheelTransforms; // Los 4 puntos vacíos (Point_Rueda_...)
+    [SerializeField] private Transform[] wheelTransforms;
 
     [Header("Suspensión (Calibrada)")]
     [SerializeField] private float restDistance = 0.5f;
@@ -18,17 +18,22 @@ public class RaycastCar : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Agarre y Fricción Lateral")]
-    [SerializeField][Range(0f, 1f)] private float tireGripFactor = 0.95f;
+    [SerializeField][Range(0f, 1f)] private float tireGripFactor = 0.45f; // Valor reducido para derrape fluido
     [SerializeField] private float maxSteerAngle = 30f;
 
-    [Header("Motor (Aceleración Automática)")]
+    [Header("Motor y Frenos")]
     [SerializeField] private float accelPower = 15000f;
     [SerializeField] private float maxSpeed = 20f;
     [SerializeField] private AnimationCurve powerCurve = AnimationCurve.Linear(0, 1, 1, 0.1f);
+    [SerializeField] private float brakePower = 20000f;
+
+    [Header("Estabilidad")]
+    [SerializeField] private Vector3 centerOfMassOffset = new Vector3(0f, -0.7f, 0f);
+    [SerializeField] private float antiRollForce = 400f;
 
     [Header("Control en el Aire")]
     [Tooltip("Fuerza de giro cuando el carro está saltando o fuera del suelo")]
-    [SerializeField] private float airControlPower = 1200f;
+    [SerializeField] private float airControlPower = 1500f;
 
     [Header("Detección de Volcadura")]
     [SerializeField] private LevelManager levelManager;
@@ -44,6 +49,7 @@ public class RaycastCar : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        rb.centerOfMass = centerOfMassOffset;
     }
 
     private void Update()
@@ -53,8 +59,9 @@ public class RaycastCar : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Solo leemos el control horizontal (Izquierda / Derecha)
+        float accelInput = Input.GetAxis("Vertical");
         float steerInput = Input.GetAxis("Horizontal");
+        bool isBraking = Input.GetKey(KeyCode.Space);
 
         bool isGrounded = false;
 
@@ -67,7 +74,6 @@ public class RaycastCar : MonoBehaviour
             Quaternion steerRotation = Quaternion.AngleAxis(currentSteerAngle, wheel.up);
 
             Vector3 steeringDir = steerRotation * wheel.right;
-            Vector3 accelDir = steerRotation * wheel.forward;
 
             Transform wheelMesh = wheel.childCount > 0 ? wheel.GetChild(0) : null;
 
@@ -83,7 +89,7 @@ public class RaycastCar : MonoBehaviour
                 isGrounded = true;
                 Vector3 wheelWorldVel = rb.GetPointVelocity(wheel.position);
 
-                // 1. POSICIÓN VISUAL BLINDADA
+                // 1. POSICIÓN VISUAL
                 if (wheelMesh != null)
                 {
                     float yPos = -hit.distance + wheelRadius;
@@ -104,16 +110,6 @@ public class RaycastCar : MonoBehaviour
                 float desiredAccel = desiredVelChange / Time.fixedDeltaTime;
 
                 rb.AddForceAtPosition(steeringDir * (desiredAccel * (rb.mass / 4f)), wheel.position);
-
-                // 4. ACELERACIÓN AUTOMÁTICA CONSTANTE (Siempre avanza)
-                float currentSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
-                float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
-
-                // Mantiene el impulso en curvas
-                float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.25f : 1.0f;
-                float availableTorque = powerCurve.Evaluate(normalizedSpeed) * turnBoost;
-
-                rb.AddForceAtPosition(accelDir * (availableTorque * accelPower), wheel.position);
             }
             else
             {
@@ -125,10 +121,38 @@ public class RaycastCar : MonoBehaviour
             }
         }
 
-        // CONTROL AÉREO: Girar en el aire con A/D o Flechas
-        if (!isGrounded && steerInput != 0)
+        // 4. SISTEMA DE MOTOR CENTRALIZADO (Conserva impulso en curvas)
+        if (isGrounded)
         {
-            rb.AddTorque(transform.up * (steerInput * airControlPower));
+            if (isBraking)
+            {
+                Vector3 forwardVel = Vector3.Project(rb.linearVelocity, transform.forward);
+                rb.AddForce(-forwardVel * brakePower * Time.fixedDeltaTime, ForceMode.Force);
+            }
+            else if (accelInput != 0)
+            {
+                float currentSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
+                float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
+
+                // Bonus leve en curvas para mantener velocidad fluida
+                float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.2f : 1.0f;
+                float availableTorque = powerCurve.Evaluate(normalizedSpeed) * accelInput * turnBoost;
+
+                rb.AddForce(transform.forward * (availableTorque * accelPower), ForceMode.Force);
+            }
+
+            // Anti-Roll para estabilidad constante
+            Vector3 predictedUp = Quaternion.AngleAxis(rb.angularVelocity.magnitude * Mathf.Rad2Deg * 0.1f, rb.angularVelocity) * transform.up;
+            Vector3 torqueVector = Vector3.Cross(predictedUp, Vector3.up);
+            rb.AddTorque(torqueVector * antiRollForce * rb.mass);
+        }
+        else
+        {
+            // CONTROL EN EL AIRE
+            if (steerInput != 0)
+            {
+                rb.AddTorque(transform.up * (steerInput * airControlPower));
+            }
         }
     }
 
