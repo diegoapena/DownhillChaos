@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/MenuPrincipal.unity
     guid: 9cb218ad7b93cf540a773cd53e48247e
   - enabled: 1
-    path: Assets/Scenes/Downhill Chaos Pruebas.unity
-    guid: 8e6a8c2077035524a84cd0fae2cdd3ee
+    path: Assets/Scenes/DownhillChaos.unity
+    guid: d5e574a7ffbc5594392aeb50f31a00a7
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
