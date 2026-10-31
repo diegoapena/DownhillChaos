@@ -212,7 +212,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -20744,7 +20744,7 @@ Transform:
   m_GameObject: {fileID: 320138086}
   serializedVersion: 2
   m_LocalRotation: {x: -0.24295999, y: -0.0136592435, z: 0.0009104784, w: -0.9699397}
-  m_LocalPosition: {x: 2504.3574, y: 608.6594, z: 29726.906}
+  m_LocalPosition: {x: 2509.4775, y: 608.6594, z: 29726.906}
   m_LocalScale: {x: 0.40531003, y: 0.40531, z: 0.40530998}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20838,7 +20838,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: -0.012523511, y: -0.9867399, z: 0.06663522, w: -0.14747016}
-  m_LocalPosition: {x: 2503.0393, y: 607.2435, z: 29734.725}
+  m_LocalPosition: {x: 2508.1594, y: 607.2435, z: 29734.725}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21148,7 +21148,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e35342b92af3af64f8db9130989cc932, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.6894531
+      value: 0.779
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e35342b92af3af64f8db9130989cc932, type: 3}
       propertyPath: m_LocalPosition.z
@@ -21235,8 +21235,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.13058332, y: 0.055487346, z: 0.43674532}
-  m_Center: {x: -0.002633033, y: -5.5035325e-18, z: -0.028301965}
+  m_Size: {x: 0.11173344, y: 0.055487346, z: 0.43674532}
+  m_Center: {x: -0.012057983, y: -3.107666e-17, z: -0.028301967}
 --- !u!1 &544419803
 GameObject:
   m_ObjectHideFlags: 0
@@ -21264,7 +21264,7 @@ Transform:
   m_GameObject: {fileID: 544419803}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2503.5, y: 605.8, z: 29732}
+  m_LocalPosition: {x: 2508.62, y: 605.8, z: 29732}
   m_LocalScale: {x: 0.40531, y: 0.40531, z: 0.40531}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21298,7 +21298,7 @@ MonoBehaviour:
   restDistance: 0.8
   springStrength: 9000
   springDamper: 800
-  wheelRadius: 0.8
+  wheelRadius: -0.35
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -22285,6 +22285,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a71ad0f0b5e38264abaab5cfd52d9fbe, type: 3}
       propertyPath: m_Name
       value: carretera
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a71ad0f0b5e38264abaab5cfd52d9fbe, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -138,6 +138,11 @@ public class RaycastCar : MonoBehaviour
                 float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.2f : 1.0f;
                 float availableTorque = powerCurve.Evaluate(normalizedSpeed) * accelInput * turnBoost;
 
+                // NUEVO: Calcula la dirección promedio de las ruedas delanteras
+                float avgSteerAngle = steerInput * maxSteerAngle;
+                Quaternion steerRot = Quaternion.AngleAxis(avgSteerAngle, transform.up);
+                Vector3 forwardDriveDir = steerRot * transform.forward;
+
                 rb.AddForce(transform.forward * (availableTorque * accelPower), ForceMode.Force);
             }
 
