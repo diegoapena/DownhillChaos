@@ -18,7 +18,7 @@ public class RaycastCar : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Agarre y Fricción Lateral")]
-    [SerializeField][Range(0f, 1f)] private float tireGripFactor = 0.45f; // Valor reducido para derrape fluido
+    [SerializeField][Range(0f, 1f)] private float tireGripFactor = 0.45f;
     [SerializeField] private float maxSteerAngle = 30f;
 
     [Header("Motor y Frenos")]
@@ -39,9 +39,6 @@ public class RaycastCar : MonoBehaviour
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private float flipThreshold = -0.5f;
     [SerializeField] private float timeToTriggerFlip = 2.0f;
-
-    [Header("Elementos de UI (Opcional)")]
-    [SerializeField] private GameObject miObjetoUI;
 
     private float flippedTimer = 0f;
     private Rigidbody rb;
@@ -121,7 +118,7 @@ public class RaycastCar : MonoBehaviour
             }
         }
 
-        // 4. SISTEMA DE MOTOR CENTRALIZADO (Conserva impulso en curvas)
+        // 4. SISTEMA DE MOTOR CENTRALIZADO
         if (isGrounded)
         {
             if (isBraking)
@@ -134,29 +131,26 @@ public class RaycastCar : MonoBehaviour
                 float currentSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
                 float normalizedSpeed = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
 
-                // Bonus leve en curvas para mantener velocidad fluida
                 float turnBoost = (Mathf.Abs(steerInput) > 0.1f) ? 1.2f : 1.0f;
                 float availableTorque = powerCurve.Evaluate(normalizedSpeed) * accelInput * turnBoost;
 
-                // NUEVO: Calcula la dirección promedio de las ruedas delanteras
                 float avgSteerAngle = steerInput * maxSteerAngle;
                 Quaternion steerRot = Quaternion.AngleAxis(avgSteerAngle, transform.up);
                 Vector3 forwardDriveDir = steerRot * transform.forward;
 
-                rb.AddForce(transform.forward * (availableTorque * accelPower), ForceMode.Force);
+                rb.AddForce(forwardDriveDir * (availableTorque * accelPower), ForceMode.Force);
             }
 
-            // Anti-Roll para estabilidad constante
             Vector3 predictedUp = Quaternion.AngleAxis(rb.angularVelocity.magnitude * Mathf.Rad2Deg * 0.1f, rb.angularVelocity) * transform.up;
             Vector3 torqueVector = Vector3.Cross(predictedUp, Vector3.up);
             rb.AddTorque(torqueVector * antiRollForce * rb.mass);
         }
         else
         {
-            // CONTROL EN EL AIRE
             if (steerInput != 0)
             {
-                rb.AddTorque(transform.up * (steerInput * airControlPower));
+                rb.AddTorque(transform.up * (steerInput * airControlPower), ForceMode.Acceleration);
+                rb.AddTorque(transform.forward * (-steerInput * (airControlPower * 0.8f)), ForceMode.Acceleration);
             }
         }
     }
@@ -171,8 +165,6 @@ public class RaycastCar : MonoBehaviour
 
             if (flippedTimer >= timeToTriggerFlip)
             {
-                SafeDestroyUI();
-
                 if (levelManager != null)
                 {
                     levelManager.TriggerRestart();
@@ -182,14 +174,6 @@ public class RaycastCar : MonoBehaviour
         else
         {
             flippedTimer = 0f;
-        }
-    }
-
-    public void SafeDestroyUI()
-    {
-        if (miObjetoUI != null)
-        {
-            Destroy(miObjetoUI);
         }
     }
 }
